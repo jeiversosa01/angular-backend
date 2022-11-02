@@ -8,12 +8,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 @Entity
-@Table(name = "cliente")
+@Table(name = "clientes")
 public class Cliente implements Serializable {
 
     @Id
@@ -24,38 +25,57 @@ public class Cliente implements Serializable {
     private String apellido;
     private String email;
 
-    @Column(name = "fecha") // Cambiar este nombre más adelante
-    @Temporal(TemporalType.DATE) // Implicitamente se hace esto pero se recomienda colocarlo
+    @Column(name = "fecha") // 1.
+    @Temporal(TemporalType.DATE) // 2.
     private Date createAt;
+
+    @PrePersist // 3.
+    public void prePersist() {
+        createAt = new Date();
+    }
 
     public long getId() {
         return id;
     }
+
     public void setId(long id) {
         this.id = id;
     }
+
     public String getNombre() {
         return nombre;
     }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
     public String getApellido() {
         return apellido;
     }
+
     public void setApellido(String apellido) {
         this.apellido = apellido;
     }
+
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
+
     public Date getCreateAt() {
         return createAt;
     }
+
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
     }
+
+    // 1. Se puede colocar @Column en la variable donde se quiere un nombre distinto
+    // en la db
+    // 2. Implicitamente se hace esto pero se recomienda colocarlo
+    // 3. crea la fecha automáticamente
 }
