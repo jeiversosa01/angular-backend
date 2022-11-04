@@ -74,8 +74,7 @@ public class Cliente implements Serializable {
         this.createAt = createAt;
     }
 
-    // 1. Se puede colocar @Column en la variable donde se quiere un nombre distinto
-    // en la db
+    // 1. Se puede colocar @Column en la variable donde se quiere un nombre distinto en la db
     // 2. Implicitamente se hace esto pero se recomienda colocarlo
     // 3. crea la fecha automáticamente
 }
