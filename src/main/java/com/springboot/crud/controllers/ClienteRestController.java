@@ -1,13 +1,19 @@
 package com.springboot.crud.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,10 +63,18 @@ public class ClienteRestController {
     }
 
     @PostMapping("/clientes")    
-    public ResponseEntity<?> create(@RequestBody Cliente cliente) { // 4.
+    public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente, BindingResult result) { // 6. // 4. // 7.
         Cliente clienteNew = null;
-        Map<String, Object> response = new HashMap<>();
-        try {
+        Map<String, Object> response = new HashMap<>();        
+        if (result.hasErrors()) {  // Validación // 7.
+            List<String> errors = new ArrayList<>();
+            for(FieldError err: result.getFieldErrors()){
+                errors.add("El campo '"+ err.getField() + "' " + err.getDefaultMessage());
+            }
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);            
+        }            
+        try {  // Errores
             clienteNew = clienteService.save(cliente);
         } catch (DataAccessException e) {
             response.put("mensaje", "Error al realizar el insert en la base de datos");
@@ -74,15 +88,23 @@ public class ClienteRestController {
     }
 
     @PutMapping("/clientes/{id}")    
-    public ResponseEntity<?> update(@RequestBody Cliente cliente, @PathVariable Long id) { // 4. // 2.
+    public ResponseEntity<?> update(@Valid @RequestBody Cliente cliente, BindingResult result, @PathVariable Long id) { // 6. // 4. // 7. // 2.
         Cliente clienteActual = clienteService.findById(id);
         Cliente clienteUpdate ;
         Map<String, Object> response = new HashMap<>();
+        if (result.hasErrors()) {   // Validación // 8.
+            List<String> errors = result.getFieldErrors()
+            .stream()
+            .map(err -> "El campo '"+ err.getField() + "' " + err.getDefaultMessage())
+            .collect(Collectors.toList());
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
         if (clienteActual == null) {
             response.put("mensaje", "Error, no se pude editar, el cliente ID: ".concat(id.toString().concat(" No existe en la base de datos!")));                        
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-        try {
+        try {  // Errores
             clienteActual.setNombre(cliente.getNombre());
             clienteActual.setApellido(cliente.getApellido());
             clienteActual.setEmail(cliente.getEmail());
@@ -120,3 +142,7 @@ public class ClienteRestController {
 // 3. @ResponseStatus(HttpStatus.CREATED) - Retorna un status 201 created
 // 4. @RequestBody - Ayuda con el json que trae el cliente {No queda muy claro}
 // 5. @ResponseStatus(HttpStatus.NO_CONTENT) - Retorna un status 204 no content
+// 6. @Valid - Valida los datos desde el back y sean correctos para la entidad 
+// 7. BindingResult - Guarda el error en la variable, ¡Debe ir antes de un @PathVariable!
+// 8. Validación para JDK 11 o superior
+// 9. Validacion para JDK 8 
