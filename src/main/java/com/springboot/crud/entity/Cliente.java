@@ -47,6 +47,8 @@ public class Cliente implements Serializable {
     // public void prePersist() {
     //     createAt = new Date();
     // }
+    
+    private String foto;
 
     public long getId() {
         return id;
@@ -86,6 +88,14 @@ public class Cliente implements Serializable {
 
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 
     // 1. Se puede colocar @Column en la variable donde se quiere un nombre distinto en la db
